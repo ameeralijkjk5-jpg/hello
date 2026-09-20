@@ -1,3 +1,7 @@
+--[[
+    DRK Hub UI Library V6
+]]
+
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
