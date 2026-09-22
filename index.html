@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lua / Luau File Tester</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#070a0f;color:#edf2f7;font-family:Arial,Tahoma,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 10%,rgba(0,210,255,.08),transparent 30%),radial-gradient(circle at 90% 80%,rgba(100,80,255,.08),transparent 35%);pointer-events:none}
+header{position:sticky;top:0;z-index:10;padding:14px 16px;background:rgba(7,10,15,.88);backdrop-filter:blur(16px);border-bottom:1px solid #202735;animation:slide .45s ease both}
+.head{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{display:flex;align-items:center;gap:10px}.logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#00d9ff,#735cff);box-shadow:0 0 25px #00d9ff33}.brand b{font-size:16px}.badge{font-size:11px;color:#93a2b7;border:1px solid #293140;border-radius:20px;padding:6px 9px}
+main{max-width:1100px;margin:auto;padding:16px}.card{background:rgba(13,18,26,.92);border:1px solid #252e3d;border-radius:17px;padding:15px;margin-bottom:14px;box-shadow:0 12px 40px #0005;animation:up .5s ease both}.card:nth-child(2){animation-delay:.06s}.card:nth-child(3){animation-delay:.12s}
+.drop{border:2px dashed #354154;border-radius:14px;padding:28px 15px;text-align:center;cursor:pointer;transition:.25s}.drop:hover,.drop.drag{border-color:#00d9ff;background:#00d9ff0c;transform:translateY(-2px)}
+.drop strong{display:block;margin-bottom:6px}.drop small{color:#8795a9}.hidden{display:none}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:1px solid #303a4b;background:#151c27;color:#fff;border-radius:10px;padding:10px 13px;cursor:pointer;transition:.2s;font-weight:600}button:hover{background:#202b3a;transform:translateY(-1px)}button:active{transform:scale(.97)}.primary{border-color:#00b9dd;background:#09232b}
+.filebar{display:none;align-items:center;justify-content:space-between;gap:10px;background:#0a1018;border:1px solid #273243;border-radius:12px;padding:10px;margin-top:12px;animation:pop .3s ease}.filebar.show{display:flex}.filename{min-width:0}.filename b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.filename span{font-size:11px;color:#7f8da0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.title h2{font-size:16px;margin:0}.count{font-size:11px;color:#7f8da0}
+.codebox{position:relative}.codebox pre{margin:0;max-height:430px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#070a0f;border:1px solid #202a38;border-radius:12px;padding:13px;direction:ltr;text-align:left;font:12.5px/1.6 monospace}.preview{max-height:350px}
+.result{white-space:pre-wrap;word-break:break-word;background:#070a0f;border:1px solid #202a38;border-radius:12px;padding:13px;min-height:180px;direction:ltr;text-align:left;font:12.5px/1.6 monospace}.ok{color:#64e58b}.err{color:#ff6d78}.warn{color:#ffd05a}.info{color:#70bfff}.meta{color:#8997aa;font-size:12px;line-height:1.7}
+.modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:16px;background:#000b;backdrop-filter:blur(8px)}.modal.show{display:flex;animation:fade .2s ease}.modalbox{width:min(1000px,100%);max-height:90vh;background:#0d121a;border:1px solid #303b4c;border-radius:17px;overflow:hidden;box-shadow:0 25px 80px #000;animation:modalIn .28s ease}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #242d3a}.modalhead b{font-size:14px}.modalbody{padding:12px;max-height:calc(90vh - 60px);overflow:auto}.modalbody pre{margin:0;white-space:pre-wrap;word-break:break-word;background:#070a0f;border:1px solid #202a38;border-radius:12px;padding:14px;direction:ltr;text-align:left;font:12.5px/1.6 monospace}
+.close{width:36px;height:36px;padding:0;border-radius:50%}.empty{color:#7e8b9e;text-align:center;padding:50px 10px}
+@keyframes slide{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{opacity:0;transform:translateY(15px) scale(.98)}to{opacity:1;transform:none}}
+@media(max-width:780px){main{padding:11px}.grid{grid-template-columns:1fr}.badge{display:none}.card{border-radius:14px}.drop{padding:24px 12px}.buttons button{flex:1}.result{min-height:150px}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="brand"><div class="logo">⚡</div><div><b>Lua / Luau File Tester</b><div class="meta">فحص ملفات Lua و Luau</div></div></div><span class="badge">Offline</span></div></header>
+
+<main>
+<section class="card">
+<div id="drop" class="drop"><strong>📁 ارفع ملف Lua أو Luau</strong><small>اضغط هنا أو اسحب الملف إلى هذه المنطقة</small></div>
+<input id="file" class="hidden" type="file" accept=".lua,.luau,.txt">
+<div id="filebar" class="filebar"><div class="filename"><b id="fname">-</b><span id="fmeta">-</span></div><button onclick="clearAll()">إزالة</button></div>
+<div class="buttons">
+<button onclick="document.getElementById('file').click()">اختيار ملف</button>
+<button class="primary" onclick="runTest()">فحص الملف</button>
+<button onclick="clearAll()">مسح</button>
+</div>
+</section>
+
+<section class="grid">
+<div class="card">
+<div class="title"><h2>الكود</h2><span id="linecount" class="count">0 سطر</span></div>
+<div class="codebox"><pre id="code">لم يتم رفع ملف.</pre></div>
+<button id="showAll" class="primary" style="margin-top:10px;width:100%;display:none" onclick="openCode()">عرض الكود كامل</button>
+</div>
+<div class="card">
+<div class="title"><h2>النتيجة</h2><span id="status" class="count">جاهز</span></div>
+<div id="result" class="result">ارفع ملف ثم اضغط «فحص الملف».</div>
+</div>
+</section>
+
+<section class="card">
+<div class="title"><h2>القائمة</h2><span class="count">أدوات الفحص</span></div>
+<div class="meta">
+✓ فحص الأقواس والبنية الأساسية<br>
+✓ فحص بعض صيغ Luau وRoblox الشائعة<br>
+✓ تحذيرات للـ loadstring و HttpGet<br>
+✓ عرض الأخطاء فقط عند الفحص
+</div>
+</section>
+</main>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeCode()">
+<div class="modalbox"><div class="modalhead"><b id="modalTitle">الكود كامل</b><button class="close" onclick="closeCode()">×</button></div><div class="modalbody"><pre id="fullCode"></pre></div></div>
+</div>
+
+<script>
+let currentFile=null,currentCode="";
+const file=document.getElementById("file"),drop=document.getElementById("drop");
+file.onchange=()=>loadFile(file.files[0]);drop.onclick=()=>file.click();
+["dragenter","dragover"].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.add("drag")}));
+["dragleave","drop"].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.remove("drag")}));
+drop.addEventListener("drop",e=>loadFile(e.dataTransfer.files[0]));
+
+function loadFile(f){
+ if(!f)return;
+ if(!/\.(lua|luau|txt)$/i.test(f.name)){setResult("err","نوع الملف غير مدعوم.");return}
+ currentFile=f;const r=new FileReader();
+ r.onload=()=>{currentCode=r.result;document.getElementById("fname").textContent=f.name;document.getElementById("fmeta").textContent=`${f.size} bytes • ${currentCode.split(/\r?\n/).length} lines`;document.getElementById("filebar").classList.add("show");renderPreview();document.getElementById("showAll").style.display="block";document.getElementById("linecount").textContent=currentCode.split(/\r?\n/).length+" سطر";setResult("info","تم تحميل الملف. اضغط «فحص الملف».");};
+ r.onerror=()=>setResult("err","تعذر قراءة الملف.");r.readAsText(f);
+}
+function renderPreview(){
+ const lines=currentCode.split(/\r?\n/);document.getElementById("code").textContent=lines.slice(0,19).map((x,i)=>String(i+1).padStart(3," ")+" | "+x).join("\n")+(lines.length>19?"\n\n… تم إخفاء بقية الكود":"");
+}
+function openCode(){document.getElementById("fullCode").textContent=currentCode;document.getElementById("modalTitle").textContent=`${currentFile?.name||"الكود"} • ${currentCode.split(/\r?\n/).length} سطر`;document.getElementById("modal").classList.add("show");document.body.style.overflow="hidden"}
+function closeCode(){document.getElementById("modal").classList.remove("show");document.body.style.overflow=""}
+function setResult(cls,text){const r=document.getElementById("result");r.className="result "+cls;r.textContent=text;document.getElementById("status").textContent=cls==="err"?"خطأ":cls==="ok"?"تم":"جاهز"}
+
+function runTest(){
+ if(!currentFile){setResult("err","ارفع ملف Lua أو Luau أولاً.");return}
+ const lines=currentCode.split(/\r?\n/), errors=[], warnings=[];
+ const stack=[];
+ let longMode=false, longEq=0;
+
+ function closeLong(line,i){
+  const token="]"+ "=".repeat(longEq)+"]";
+  const at=line.indexOf(token);
+  if(at>=0){longMode=false;return line.slice(at+token.length)}
+  return null;
+ }
+ function scan(line,i){
+  let text=line, out="", j=0;
+  while(j<text.length){
+   if(longMode){
+    const rest=closeLong(text,i);
+    if(rest===null)return;
+    text=rest;j=0;longMode=false;
+    continue;
+   }
+   if(text[j]==="-" && text[j+1]==="-"){
+    if(text[j+2]==="["){
+     const m=text.slice(j+2).match(/^\[(=*)\[/);
+     if(m){longMode=true;longEq=m[1].length;return}
+    }
+    return;
+   }
+   if(text[j]==="["){
+    const m=text.slice(j).match(/^\[(=*)\[/);
+    if(m){longMode=true;longEq=m[1].length;j+=m[0].length;continue}
+   }
+   if(text[j]==="'" || text[j]==='"'){
+    const q=text[j++]; while(j<text.length){if(text[j]==="\\"){j+=2;continue}if(text[j]===q){j++;break}j++} continue
+   }
+   const c=text[j];
+   if(c==="("||c==="["||c==="{") stack.push({c,line:i+1});
+   else if(c===")"||c==="]"||c==="}"){
+    const open={")":"(","]":"[","}":"{"}[c];
+    if(!stack.length || stack[stack.length-1].c!==open){
+      errors.push(`السطر ${i+1}: قوس ${c} غير متطابق`);
+    }else stack.pop();
+   }
+   j++;
+  }
+ }
+ for(let i=0;i<lines.length;i++)scan(lines[i],i);
+
+ if(stack.length){
+   const names={"(":"()","[":"[]","{":"{}"};
+   [...stack].reverse().slice(0,12).forEach(x=>errors.push(`السطر ${x.line}: قوس ${names[x.c]} مفتوح بدون إغلاق`));
+ }
+ const code=currentCode;
+ const loadLines=lines.map((x,i)=>[x,i+1]).filter(([x])=>/\bloadstring\s*\(/.test(x));
+ const httpLines=lines.map((x,i)=>[x,i+1]).filter(([x])=>/\bHttpGet\s*\(/.test(x));
+ loadLines.slice(0,5).forEach(([,n])=>warnings.push(`السطر ${n}: loadstring يعتمد على البيئة التي تشغّل السكربت`));
+ httpLines.slice(0,5).forEach(([,n])=>warnings.push(`السطر ${n}: HttpGet يحتاج بيئة HTTP`));
+
+ const unique=[...new Set(errors)];
+ let msg="";
+ if(unique.length){
+   msg+="✗ الأخطاء\n\n"+unique.slice(0,30).join("\n");
+   if(unique.length>30)msg+=`\n\n... و ${unique.length-30} أخطاء أخرى`;
+ }else{
+   msg+="✓ ما ظهر خطأ في الفحص الأساسي.";
+ }
+ if(warnings.length){
+   msg+="\n\n⚠ التحذيرات\n\n"+warnings.join("\n");
+ }
+ document.getElementById("result").className="result "+(unique.length?"err":"ok");
+ document.getElementById("result").textContent=msg;
+ document.getElementById("status").textContent=unique.length?`${unique.length} خطأ`:"سليم";
+}
+function clearAll(){currentFile=null;currentCode="";file.value="";document.getElementById("filebar").classList.remove("show");document.getElementById("code").textContent="لم يتم رفع ملف.";document.getElementById("fullCode").textContent="";document.getElementById("result").textContent="ارفع ملف ثم اضغط «فحص الملف».";document.getElementById("result").className="result";document.getElementById("status").textContent="جاهز";document.getElementById("linecount").textContent="0 سطر";document.getElementById("showAll").style.display="none"}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCode()});
+</script>
+</body>
+</html>
